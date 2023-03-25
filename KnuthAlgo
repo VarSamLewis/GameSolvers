@@ -1,0 +1,45 @@
+"""
+This program implements Knuth's algorithm for solving the game where you're given a list of words with the same number of characters,
+and you must guess the correct word in four tries or fewer, receiving feedback about how many characters match in each guess.
+"""
+
+import itertools
+
+def make_guess(possible_words):
+    """Make a guess based on the list of possible words"""
+    # Generate all possible combinations of four words from the list
+    combinations = itertools.combinations(possible_words, 4)
+    # Choose the combination with the highest average similarity to all other words
+    best_combination = max(combinations, key=lambda x: average_similarity(x, possible_words))
+    # Return the first word from the chosen combination as the guess
+    return best_combination[0]
+
+def average_similarity(words, possible_words):
+    """Calculate the average similarity of a list of words to all possible words"""
+    total_similarity = 0
+    for word in possible_words:
+        similarity = max([sum(a == b for (a, b) in zip(word, guess)) for guess in words])
+        total_similarity += similarity
+    return total_similarity / len(possible_words)
+
+# Set up the game with the list of possible words and number of guesses
+possible_words = ["salt", "seed", "seen", "soon", "soul"]
+guesses = 4
+
+# Loop until the program either guesses the correct word or runs out of guesses
+while guesses > 0:
+    # Make a guess and print it to the console
+    guess = make_guess(possible_words)
+    print(f"I guess: {guess}")
+    # Prompt the user for feedback on how many characters match
+    feedback = input("How many characters match? ")
+    # If the guess is correct, print a victory message and break the loop
+    if int(feedback) == len(guess):
+        print("I win!")
+        print(f"Guessed word: {guess}")
+        break
+    # Otherwise, update the list of possible words and decrement the number of remaining guesses
+    else:
+        possible_words = [word for word in possible_words if sum(a == b for (a, b) in zip(word, guess)) == int(feedback)]
+        guesses -= 1
+# If the program didn't guess the correct word within the allotted number of guesses, print a failure message
